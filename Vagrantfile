@@ -33,8 +33,8 @@ Vagrant.configure("2") do |config|
                 vb.cpus = 2
                 vb.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
             end
-            node.vm.provision "shell", path "scripts/common.sh"
-            node.vm.provision "shell", path "scripts/worker.sh"
+            node.vm.provision "shell", path: "scripts/common.sh"
+            node.vm.provision "shell", path: "scripts/worker.sh"
         end
     end
 end
