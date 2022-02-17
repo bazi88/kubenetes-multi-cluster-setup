@@ -8,7 +8,7 @@ sudo kubeadm config images pull
 echo "Preflight Check Passed: Downloaded All Required Images"
 
 
-sudo kubeadm init --apiserver-advertise-address=$MASTER_NODE  --apiserver-cert-extra-sans=$MASTER_NODE --pod-network-cidr=$POD_CIDR --node-name $NODENAME --ignore-preflight-errors
+sudo kubeadm init --apiserver-advertise-address=$MASTER_NODE  --pod-network-cidr=$POD_CIDR --ignore-preflight-errors
 
 mkdir -p $HOME/.kube
 sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
