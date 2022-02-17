@@ -41,35 +41,27 @@ EOF
 # Apply sysctl params without reboot
 sudo sysctl --system
 
-# Remove curl and install
-sudo apt-get remove curl
-sudo apt-get remove --auto-remove curl
-sudo apt install curl
-
-# Remove all docker and reinstall docker
-sudo docker stop $(docker ps -a -q)
-sudo docker rmi $(docker images -a -q)
-sudo docker rm $(docker ps -a -f status=exited -q)
-sudo docker volume prune
-sudo docker system prune
-sudo apt-get purge docker-ce docker-ce-cli containerd.io
-sudo rm -rf /var/lib/docker
-sudo rm -rf /var/lib/containerd
-
-sudo apt-get update
-sudo apt-get install \
+#Clean Install Docker Engine on Ubuntu
+sudo apt-get remove docker docker-engine docker.io containerd runc
+sudo apt-get update -y
+sudo apt-get install -y \
+    apt-transport-https \
     ca-certificates \
     curl \
     gnupg \
     lsb-release
 
-sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+#Add Docker’s official GPG key:
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+
+#set up the stable repository
 echo \
   "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu \
   $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
 
-sudo apt-get update
-sudo apt-get install docker-ce docker-ce-cli containerd.io
+#Install Docker Engine
+sudo apt-get update -y
+sudo apt-get install -y docker-ce docker-ce-cli containerd.io
 
 #Configure containerd
 sudo mkdir -p /etc/containerd
@@ -80,15 +72,7 @@ sudo systemctl restart containerd
 
 echo "ContainerD Runtime Configured Successfully"
 
-
-# Remove all kubeadm,kubelet,kubectl and reinstall
-
-sudo kubeadm reset -y
-sudo apt-get purge kubeadm kubectl kubelet kubernetes-cni kube*   
-sudo apt-get autoremove  
-sudo rm -rf ~/.kube
-
-
+#Installing kubeadm, kubelet and kubectl
 sudo apt-get update -y 
 sudo apt-get install -y apt-transport-https ca-certificates curl
 
@@ -99,15 +83,7 @@ sudo curl -fsSLo /usr/share/keyrings/kubernetes-archive-keyring.gpg https://pack
 echo "deb [signed-by=/usr/share/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee /etc/apt/sources.list.d/kubernetes.list
 
 #Update apt package index, install kubelet, kubeadm and kubectl, and pin their version:
-sudo apt-get update && sudo apt-get install -y apt-transport-https curl
-
-cat <<EOF | sudo tee /etc/apt/sources.list.d/kubernetes.list
-deb https://apt.kubernetes.io/ kubernetes-xenial main
-EOF
-
-sudo apt update
-
-sudo apt-get install -y kubelet kubectl kubeadm
+sudo apt-get update -y
 sudo apt install -y kubeadm=$KUBERNETES_VERSION kubelet=$KUBERNETES_VERSION kubectl=$KUBERNETES_VERSION
 
 sudo apt-mark hold kubelet kubeadm kubectl
